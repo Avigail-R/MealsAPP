@@ -1,16 +1,17 @@
-﻿import {Image, Text, View, StyleSheet, ScrollView} from "react-native";
+﻿import { Image, Text, View, StyleSheet, ScrollView } from "react-native";
 import { MEALS } from "../data/dummy-data";
 import MealDetails from "../components/MealDetails";
 import Subtitle from "../components/MealDetail/Subtitle";
 import { RouteProp } from '@react-navigation/native';
-import {RootStackParamList} from "../App";
+import { RootStackParamList } from "../App";
 import List from "../components/MealDetail/List";
-import {useContext, useLayoutEffect} from 'react'
-import {StackNavigationProp} from "@react-navigation/stack";
+import { useLayoutEffect } from 'react';
+import { StackNavigationProp } from "@react-navigation/stack";
 import IconButton from "../components/IconButton";
-import {FavoritesContext} from "../store/context/favorites-context";
-
-
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../store/redux/store"; // Adjust the import path as needed
+import { addFavorite, removeFavorite } from "../store/redux/favorites";
+/*import {FavoritesContext} from "../store/context/favorites-context";*/
 
 type MealDetailScreenProps = {
     route: RouteProp<RootStackParamList, 'MealDetail'>;
@@ -18,31 +19,43 @@ type MealDetailScreenProps = {
 };
 
 function MealDetailScreen({ route, navigation }: MealDetailScreenProps) {
-    const favoriteMealsCtx = useContext(FavoritesContext);
+    /*const favoriteMealsCtx = useContext(FavoritesContext);*/
+    const dispatch = useDispatch();
+    const favoriteMealsIds = useSelector((state: RootState) => state.favoritesMeals.ids);
     const mealId = route.params.mealId;
     const selectedMeal = MEALS.find(meal => meal.id === mealId);
-    
-    const mealIsFavorite = favoriteMealsCtx.ids.includes(mealId);         
+
+    const mealIsFavorite = favoriteMealsIds.includes(mealId);
+
     const changeFavoriteStatusHandler = () => {
         if (mealIsFavorite) {
-            favoriteMealsCtx.removeFavorite(mealId);
-        }
-        else {
-            favoriteMealsCtx.addFavorite(mealId);
+            /*favoriteMealsCtx.removeFavorite(mealId);*/
+            dispatch(removeFavorite(mealId));
+        } else {
+            /*favoriteMealsCtx.addFavorite(mealId);*/
+            dispatch(addFavorite({ id: mealId }));
         }
     };
+
     if (!selectedMeal) {
         return <Text>Meal not found!</Text>;
     }
+
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerRight: () => { return <IconButton icon={mealIsFavorite? "star" : "star-outline"} color="white" onPress={changeFavoriteStatusHandler}/>}
+            headerRight: () => (
+                <IconButton
+                    icon={mealIsFavorite ? "star" : "star-outline"}
+                    color="white"
+                    onPress={changeFavoriteStatusHandler}
+                />
+            ),
         });
     }, [navigation, changeFavoriteStatusHandler]);
 
     return (
         <ScrollView style={styles.rootContainer}>
-            <Image style={styles.image} source={{uri: selectedMeal.imageUrl}}/>
+            <Image style={styles.image} source={{ uri: selectedMeal.imageUrl }} />
             <Text style={styles.title}>{selectedMeal.title}</Text>
             <MealDetails
                 duration={selectedMeal.duration}
@@ -52,12 +65,12 @@ function MealDetailScreen({ route, navigation }: MealDetailScreenProps) {
             />
             <View style={styles.listOuterContainer}>
                 <View style={styles.listContainer}>
-                <Subtitle>Ingredients</Subtitle>
-                <List data={selectedMeal.ingredients}/>
-                <View style={styles.subTitleContainer}>
-                    <Subtitle>Steps</Subtitle>
-                    <List data={selectedMeal.steps}/>
-                </View>
+                    <Subtitle>Ingredients</Subtitle>
+                    <List data={selectedMeal.ingredients} />
+                    <View style={styles.subTitleContainer}>
+                        <Subtitle>Steps</Subtitle>
+                        <List data={selectedMeal.steps} />
+                    </View>
                 </View>
             </View>
         </ScrollView>
