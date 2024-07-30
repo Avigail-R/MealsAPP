@@ -8,10 +8,11 @@ import List from "../components/MealDetail/List";
 import { useLayoutEffect } from 'react';
 import { StackNavigationProp } from "@react-navigation/stack";
 import IconButton from "../components/IconButton";
-import { useSelector, useDispatch } from "react-redux";
+/*import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store/redux/store"; // Adjust the import path as needed
-import { addFavorite, removeFavorite } from "../store/redux/favorites";
+import { addFavorite, removeFavorite } from "../store/redux/favorites";*/
 /*import {FavoritesContext} from "../store/context/favorites-context";*/
+import { useFavoritesStore } from "../store/zustand/favorites";
 
 type MealDetailScreenProps = {
     route: RouteProp<RootStackParamList, 'MealDetail'>;
@@ -20,20 +21,24 @@ type MealDetailScreenProps = {
 
 function MealDetailScreen({ route, navigation }: MealDetailScreenProps) {
     /*const favoriteMealsCtx = useContext(FavoritesContext);*/
-    const dispatch = useDispatch();
-    const favoriteMealsIds = useSelector((state: RootState) => state.favoritesMeals.ids);
+    /*const dispatch = useDispatch();
+    const favoriteMealsIds = useSelector((state: RootState) => state.favoritesMeals.ids);*/
+    const { ids, addFavorite, removeFavorite } = useFavoritesStore();
     const mealId = route.params.mealId;
     const selectedMeal = MEALS.find(meal => meal.id === mealId);
 
-    const mealIsFavorite = favoriteMealsIds.includes(mealId);
+    const mealIsFavorite = ids.includes(mealId);
 
     const changeFavoriteStatusHandler = () => {
         if (mealIsFavorite) {
-            /*favoriteMealsCtx.removeFavorite(mealId);*/
-            dispatch(removeFavorite(mealId));
+            /*favoriteMealsCtx.removeFavorite(mealId);*/ 
+            /*dispatch(removeFavorite(mealId));*/
+            removeFavorite(mealId);
+            
         } else {
             /*favoriteMealsCtx.addFavorite(mealId);*/
-            dispatch(addFavorite({ id: mealId }));
+            /*dispatch(addFavorite({ id: mealId }));*/
+            addFavorite(mealId);
         }
     };
 
